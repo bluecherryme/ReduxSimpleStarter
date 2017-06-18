@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import API_key from './components/API_key.js';
@@ -9,19 +10,34 @@ import VideoDetail from './components/video_detail';
 class App extends Component {
   constructor(){
     super();
-    this.state = { videos: [] };
+    this.state = { 
+      videos: [],
+      selectedVideo: null 
+    };
 
-    YTSearch({key: API_key, term: 'surfboards'}, (videos) =>{
-    this.setState({ videos });
-});
-  };
+  this.videoSearch('hiking');  
+}
+
+  videoSearch(term){
+    YTSearch({key: API_key, term:term}, (videos) =>{
+      this.setState({ 
+        videos:videos,
+        selectedVideo: videos[0]
+      });
+      });
+    }
+  
 
   render(){
+    const videoSearch = _.debounce((term)=>{this.videoSearch(term)},300)
+    
     return(
       <div>
-        <SearchBar />
-        <VideoDetail video={this.state.videos[0]} />
-        <VideoList videos={this.state.videos} />
+        <SearchBar onSearchTermChange={videoSearch} />
+        <VideoDetail video={this.state.selectedVideo} />
+        <VideoList 
+          onVideoSelect={selectedVideo => this.setState({selectedVideo})}
+          videos={this.state.videos} />
       </div>
     );
   }
